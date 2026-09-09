@@ -1,6 +1,8 @@
 export type Rating = "S" | "A" | "B" | "C" | "D";
 export type Tier = Rating;
 
+export const MAX_PLAYERS = 50;
+
 export interface PlayerStats {
   stamina: Rating;
   speed: Rating;

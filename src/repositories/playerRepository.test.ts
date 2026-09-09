@@ -37,6 +37,21 @@ describe("PlayerRepository", () => {
     });
   });
 
+  it("copies mutation input before storing it", async () => {
+    const repository = new MockPlayerRepository();
+    const input = {
+      ...playerInput,
+      stats: { ...playerInput.stats },
+    };
+    const created = await repository.createPlayer(input);
+
+    input.stats.speed = "S";
+
+    await expect(repository.getPlayer(created.id)).resolves.toMatchObject({
+      stats: { speed: "B" },
+    });
+  });
+
   it("creates, updates, and deletes a player", async () => {
     const repository = new MockPlayerRepository();
     const created = await repository.createPlayer(playerInput);

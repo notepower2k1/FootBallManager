@@ -1,4 +1,5 @@
-import type { Player } from "../../domain/player";
+import { MAX_PLAYERS, type Player } from "../../domain/player";
+import { AppError } from "../../domain/errors";
 import type {
   CreatePlayerInput,
   PlayerRepository,
@@ -28,9 +29,17 @@ export class MockPlayerRepository implements PlayerRepository {
   }
 
   async createPlayer(input: CreatePlayerInput): Promise<Player> {
+    if (this.players.length >= MAX_PLAYERS) {
+      throw new AppError(
+        "VALIDATION_ERROR",
+        `A maximum of ${MAX_PLAYERS} players is allowed.`,
+      );
+    }
+
     const now = new Date().toISOString();
     const player: Player = {
       ...input,
+      stats: { ...input.stats },
       id: `player-${crypto.randomUUID()}`,
       createdAt: now,
       updatedAt: now,
@@ -43,7 +52,7 @@ export class MockPlayerRepository implements PlayerRepository {
   async updatePlayer(id: string, input: UpdatePlayerInput): Promise<Player> {
     const index = this.players.findIndex((player) => player.id === id);
     if (index < 0) {
-      throw new Error(`Player not found: ${id}`);
+      throw new AppError("NOT_FOUND", "Player could not be found.");
     }
 
     const current = this.players[index];
@@ -61,7 +70,7 @@ export class MockPlayerRepository implements PlayerRepository {
   async deletePlayer(id: string): Promise<void> {
     const index = this.players.findIndex((player) => player.id === id);
     if (index < 0) {
-      throw new Error(`Player not found: ${id}`);
+      throw new AppError("NOT_FOUND", "Player could not be found.");
     }
 
     this.players.splice(index, 1);
